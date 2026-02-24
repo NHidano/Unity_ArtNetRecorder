@@ -11,9 +11,15 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private Text headerText;
     [SerializeField] private Text endText;
 
-    private double endTimeMillisec; 
-    
+    // ループ再生トグル
+    [SerializeField] private Toggle loopToggle;
+
+    private double endTimeMillisec;
+
     public IObservable<Unit> OnPlayButtonPressedAsObservable => playButton.OnClickAsObservable;
+
+    // ループトグル変更イベントをリアクティブストリームとして公開する
+    public IObservable<bool> OnLoopToggleChangedAsObservable => loopToggle.OnValueChangedAsObservable();
 
     private void Awake()
     {
