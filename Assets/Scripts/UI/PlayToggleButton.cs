@@ -29,4 +29,15 @@ public class PlayToggleButton : MonoBehaviour
         pauseImage.gameObject.SetActive(false);
         playImage.gameObject.SetActive(true);
     }
+
+    /// <summary>
+    /// ボタンのインタラクション有効/無効を切り替える。
+    /// タイムコード受信モード中の手動操作無効化に使用する。
+    /// (タスク3.4: Requirements 3.3, 3.6)
+    /// </summary>
+    /// <param name="interactable">true で有効化、false で無効化</param>
+    public void SetInteractable(bool interactable)
+    {
+        button.interactable = interactable;
+    }
 }
