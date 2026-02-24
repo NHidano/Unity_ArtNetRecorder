@@ -11,4 +11,5 @@ public enum ArtNetOpCodes
     TodControl = 0x82,
     Rdm = 0x83,
     RdmSub = 0x84,
+    TimeCode = 0x97,
 }

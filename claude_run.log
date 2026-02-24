@@ -91,3 +91,29 @@ SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/ho
 
 === END 2.1 ループ再生トグルUIを追加する (exit: 0, 2026-02-24 21:38:12) ===
 === START 2.2 ループ再生ロジックをアプリケーション層に実装する (2026-02-24 21:38:12) ===
+タスク 2.2 の実装が完了しました。
+
+### 実装サマリ
+**タスク 2.2: ループ再生ロジックをアプリケーション層に実装する** - 完了
+
+
+| ファイル | 種別 | 内容 |
+|---------|------|------|
+| `Assets/Tests/EditMode/ArtNetPlayerApplicationLoopTests.cs` | 新規 | 12件のEditModeテスト |
+| `Assets/Scripts/Core/Application/ArtNetPlayerApplication.cs` | 変更 | ループ再生ロジック統合 |
+| `Assets/Scripts/Core/Player/LoopPlaybackLogic.cs` | 新規 | 純粋判定ロジック（`EndOfPlaybackAction`列挙型 + `LoopPlaybackLogic`静的クラス） |
+| `.kiro/specs/playback-enhancements/tasks.md` | 変更 | タスク2.2を完了済みにマーク |
+
+**対応要件:**
+- **Req 2.2**: ループ有効時 → 終端到達で先頭リセット＆再生継続
+- **Req 2.3**: ループ無効時 → 再生停止＆シークバー終端保持
+- **Req 2.4**: 再生中の設定変更を即座に反映
+
+コミット `2.2 ループ再生ロジックをアプリケーション層に実装する` が作成されました。
+
+[STDERR]
+SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/hooks/cleanup-test-results.ps1"] failed: -File �p�����[�^�[�̈��� '.claude/hooks/cleanup-test-results.ps1' �͑��݂��܂���B������ '.ps1' �t�@�C���̃p�X�� -File �p�����[�^�[�̈����Ƃ��Ďw�肵�Ă��������B
+
+
+=== END 2.2 ループ再生ロジックをアプリケーション層に実装する (exit: 0, 2026-02-24 21:41:04) ===
+=== START 3.1 ArtNet OpCode定義にタイムコードを追加する (2026-02-24 21:41:04) ===

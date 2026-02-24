@@ -36,7 +36,7 @@
   - _Requirements: 2.2, 2.3, 2.4_
 
 - [ ] 3. ArtNetタイムコード受信による再生制御の実装
-- [ ] 3.1 (P) ArtNet OpCode定義にタイムコードを追加する
+- [x] 3.1 (P) ArtNet OpCode定義にタイムコードを追加する
   - OpCode列挙型にTimecodeエントリ (0x97) を追加する
   - 既存のOpCode判定処理との互換性を確認する
   - _Requirements: 3.2_
