@@ -25,11 +25,14 @@ public class ArtNetPlayerApplication : ApplicationBase
     [SerializeField] private LoadingUI loadingUI;
 
     private bool initialized = false;
-    
+
     private double header = 0;
     private double endTime;
 
     private PlayState playState = PlayState.Pausing;
+
+    // ループ再生フラグ: トグルUIからのイベントで切り替える (タスク2.2)
+    private bool isLoopEnabled = false;
     
     
     public override void OnClose()
@@ -76,6 +79,12 @@ public class ArtNetPlayerApplication : ApplicationBase
             {
                 audioPlayer.LoadClipFromPath(path).Forget();
             }
+        }).AddTo(this);
+
+        // ループ再生トグルの変更イベントを購読し、isLoopEnabled フラグを即座に反映する (タスク2.2)
+        playerUI.OnLoopToggleChangedAsObservable.Subscribe(value =>
+        {
+            isLoopEnabled = value;
         }).AddTo(this);
 
     }
@@ -150,17 +159,46 @@ public class ArtNetPlayerApplication : ApplicationBase
 
         if (playState == PlayState.Pausing) return;
 
-        if (header > endTime)
+        // 終端到達の判定とループ再生処理 (タスク2.2)
+        if (LoopPlaybackLogic.IsEndOfPlayback(header, endTime))
         {
-            Pause();
+            HandleEndOfPlayback();
+            return;
         }
-        
+
         header += Time.deltaTime * 1000;    // millisec
 
         visualizer.Exec(artNetPlayer.ReadAndSend(header));
 
         playerUI.SetHeader(header);
 
+    }
+
+    /// <summary>
+    /// 再生位置が終端に到達した際の処理。
+    /// ループ有効時は先頭にリセットして再生を継続し、
+    /// ループ無効時は再生を停止してシークバーを終端位置に保持する。
+    /// (タスク2.2: Requirements 2.2, 2.3)
+    /// </summary>
+    private void HandleEndOfPlayback()
+    {
+        var action = LoopPlaybackLogic.DetermineEndOfPlaybackAction(isLoopEnabled);
+
+        switch (action)
+        {
+            case EndOfPlaybackAction.ResetToBeginning:
+                // ループ有効: 先頭にリセットして再生を継続する
+                header = 0;
+                audioPlayer.Resume(2566.667f);
+                break;
+
+            case EndOfPlaybackAction.StopPlayback:
+                // ループ無効: 再生を停止し、シークバーを終端位置に保持する
+                header = endTime;
+                playerUI.SetHeader(endTime);
+                Pause();
+                break;
+        }
     }
     
 }
