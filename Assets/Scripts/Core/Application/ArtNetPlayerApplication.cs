@@ -98,16 +98,17 @@ public class ArtNetPlayerApplication : ApplicationBase
         
         if (data != null)
         {
+            // 録画データから実際のユニバース数を取得し、ComputeShaderディスパッチ用に32の倍数に切り上げ
+            var maxUniverseNum = ((data.MaxUniverseCount + 31) / 32) * 32;
+
             // initialize visualizer
-            // TODO: 今後ファイルに使用Universe数を格納するようにする。
-            const int maxUniverseNum = 32;
             visualizer.Initialize(maxUniverseNum);
-            
+
             // initialize player
             playerUI.Initialize(endTime);
             playerUI.SetAsPlayVisual();
             playState = PlayState.Pausing;
-        
+
             // initialize buffers
             artNetPlayer.Initialize(maxUniverseNum);
 

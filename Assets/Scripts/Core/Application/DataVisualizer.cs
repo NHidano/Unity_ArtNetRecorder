@@ -23,16 +23,21 @@ public class DataVisualizer : MonoBehaviour, IDisposable
     {
         rawImage.enabled = false;
     }
-    
+
+    /// <summary>
+    /// ビジュアライザーを初期化する。
+    /// maxUniverseNumはComputeShaderディスパッチのため32の倍数である必要がある。
+    /// </summary>
     public void Initialize(int maxUniverseNum = 64)
     {
-        this.maxUniverseNum = maxUniverseNum;
-        
+        // ComputeShaderのスレッドグループサイズ(32)の倍数に切り上げ（安全策）
+        this.maxUniverseNum = ((maxUniverseNum + 31) / 32) * 32;
+
         kernelIndex = dmxTextureBufferCompute.FindKernel("CSMain");
-        dmxComputeBuffer = new ComputeBuffer(maxUniverseNum * 512, sizeof(float));    // universe * 
+        dmxComputeBuffer = new ComputeBuffer(this.maxUniverseNum * 512, sizeof(float));
         dmxTextureBufferCompute.SetBuffer(kernelIndex, "_Buffer", dmxComputeBuffer);
-        
-        dmxBuffer = CreateRenderTexture(512, maxUniverseNum);
+
+        dmxBuffer = CreateRenderTexture(512, this.maxUniverseNum);
         dmxTextureBufferCompute.SetTexture(kernelIndex, "_Result", dmxBuffer);
 
         rawImage.texture = dmxBuffer;
@@ -41,10 +46,10 @@ public class DataVisualizer : MonoBehaviour, IDisposable
     // Update is called once per frame
     public void Exec(float[] dmxRaw)
     {
-        
+
         dmxComputeBuffer.SetData(dmxRaw);
         dmxTextureBufferCompute.Dispatch(kernelIndex, 512 / 32, maxUniverseNum / 32, 1);
-        
+
     }
     
     private RenderTexture CreateRenderTexture(int width, int height)
