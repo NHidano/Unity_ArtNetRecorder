@@ -254,3 +254,31 @@ SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/ho
 
 === END 3.5 タイムコード同期再生ロジックをアプリケーション層に統合する (exit: 0, 2026-02-24 22:00:52) ===
 === START 4 ArtNet再送信先設定の永続化を実装する (2026-02-24 22:00:52) ===
+タスク4の実装とコミットが完了しました。
+## 実装サマリー
+
+
+### タスク4: ArtNet再送信先設定の永続化
+
+**新規ファイル:**
+- `Assets/Tests/EditMode/ArtNetResendPersistenceTests.cs` — 39件のテストケース（要件4.1〜4.5カバー）
+
+**変更ファイル:**
+- `Assets/Scripts/UI/ArtNetResendUI.cs` — `LoadSettings()`で起動時にPlayerPrefsから読み込み・検証・UIへ反映。`SaveIP()`/`SavePort()`で検証成功時のみ即時保存。`SaveToggleState()`でトグル変更時に即時保存
+
+- `Assets/Scripts/UI/ResendSettingsValidator.cs` — PlayerPrefsキー定数(`ResendSettingsKeys`)、デフォルト値(`ResendSettingsDefaults`)、検証ロジック(`ResendSettingsValidator`)を提供する純粋な静的クラス群
+**要件カバレッジ:**
+| 要件 | 内容 | 状態 |
+|------|------|------|
+| 4.1 | DstIP入力値の保存 | 完了 |
+| 4.2 | DstPort入力値の保存 | 完了 |
+| 4.3 | 起動時の保存値読み込み・表示 | 完了 |
+| 4.4 | デフォルト値 (IP: "2.0.0.1", Port: 6454, Toggle: OFF) | 完了 |
+| 4.5 | トグル状態の保存 | 完了 |
+
+[STDERR]
+
+SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/hooks/cleanup-test-results.ps1"] failed: -File �p�����[�^�[�̈��� '.claude/hooks/cleanup-test-results.ps1' �͑��݂��܂���B������ '.ps1' �t�@�C���̃p�X�� -File �p�����[�^�[�̈����Ƃ��Ďw�肵�Ă��������B
+
+=== END 4 ArtNet再送信先設定の永続化を実装する (exit: 0, 2026-02-24 22:04:48) ===
+=== START 5.1 シークバー性能改善の統合確認 (2026-02-24 22:04:48) ===
