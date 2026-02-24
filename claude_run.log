@@ -117,3 +117,30 @@ SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/ho
 
 === END 2.2 ループ再生ロジックをアプリケーション層に実装する (exit: 0, 2026-02-24 21:41:04) ===
 === START 3.1 ArtNet OpCode定義にタイムコードを追加する (2026-02-24 21:41:04) ===
+タスク3.1の実装が完了し、コミット済みです。
+### 実装サマリー
+
+
+**タスク 3.1: ArtNet OpCode定義にタイムコードを追加する** — 完了
+
+- `ArtNetOpCodes.cs` — `TimeCode = 0x97` エントリを追加
+- `ArtNetOpCodesTimecodeTests.cs` — 7件のEditModeテスト新規作成
+- `tasks.md` — タスク3.1を完了済み `[x]` にマーク
+
+**テスト (7件 全パス):**
+- TimeCodeの値が0x97であること
+- 既存9つのOpCodeとの値重複がないこと
+- 既存OpCode全ての値が維持されていること
+- タイムコードパケットのパース互換性確認
+- DMXパケットが引き続き正しく判定されること
+
+### 次のステップ
+- `/kiro:spec-impl playback-enhancements 3.2` — タイムコード受信コンポーネントの新規作成
+**変更内容:**
+
+[STDERR]
+SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/hooks/cleanup-test-results.ps1"] failed: -File �p�����[�^�[�̈��� '.claude/hooks/cleanup-test-results.ps1' �͑��݂��܂���B������ '.ps1' �t�@�C���̃p�X�� -File �p�����[�^�[�̈����Ƃ��Ďw�肵�Ă��������B
+
+
+=== END 3.1 ArtNet OpCode定義にタイムコードを追加する (exit: 0, 2026-02-24 21:43:32) ===
+=== START 3.2 タイムコード受信コンポーネントを新規作成する (2026-02-24 21:43:32) ===
