@@ -172,3 +172,85 @@ SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/ho
 
 === END 3.2 タイムコード受信コンポーネントを新規作成する (exit: 0, 2026-02-24 21:49:25) ===
 === START 3.3 タイムコード受信タイムアウト検出を実装する (2026-02-24 21:49:25) ===
+タスク 3.3 の実装とコミットが完了しました。
+
+### 実装サマリー
+
+**新規ファイル:**
+| ファイル | 説明 |
+|---|---|
+| `Assets/Scripts/Core/Player/TimecodeTimeoutLogic.cs` | タイムアウト判定の純粋ロジッククラス（LoopPlaybackLogicパターン踏襲） |
+| `Assets/Tests/EditMode/TimecodeTimeoutTests.cs` | テスト20件 |
+
+**変更ファイル:**
+| ファイル | 説明 |
+|---|---|
+| `Assets/Scripts/Core/Player/ArtNetTimecodeReceiver.cs` | `IsTimedOut` プロパティを `TimecodeTimeoutLogic.DetermineTimeoutState` に委譲 |
+| `.kiro/specs/playback-enhancements/tasks.md` | タスク3.3を完了にマーク |
+
+**テスト (20件):**
+- `TimecodeTimeoutLogic.IsTimedOut`: 経過時間と閾値の比較ロジック (7件)
+- `TimecodeTimeoutLogic.DetermineTimeoutState`: 受信状態を含む総合判定 (5件)
+- `ArtNetTimecodeReceiver` リフレクション検証 (7件)
+- `DefaultTimeoutSeconds` 定数検証 (1件)
+
+**次のタスク:** `3.4 タイムコード受信モードUIを追加する`
+
+[STDERR]
+SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/hooks/cleanup-test-results.ps1"] failed: -File �p�����[�^�[�̈��� '.claude/hooks/cleanup-test-results.ps1' �͑��݂��܂���B������ '.ps1' �t�@�C���̃p�X�� -File �p�����[�^�[�̈����Ƃ��Ďw�肵�Ă��������B
+
+
+=== END 3.3 タイムコード受信タイムアウト検出を実装する (exit: 0, 2026-02-24 21:53:12) ===
+=== START 3.4 タイムコード受信モードUIを追加する (2026-02-24 21:53:12) ===
+タスク3.4の実装が完了しました。
+
+### 実装内容
+
+**新規ファイル:**
+- `Assets/Scripts/Core/Player/TimecodeDisplayFormatter.cs` — タイムコード表示フォーマット (HH:MM:SS:FF形式)
+- `Assets/Tests/EditMode/PlayerUITimecodeTests.cs` — テスト21件
+
+**変更ファイル:**
+- `Assets/Scripts/UI/PlayToggleButton.cs` — `SetInteractable(bool)`メソッド追加
+- `Assets/Scripts/UI/PlayerUI.cs` — タイムコードトグル/表示テキスト、リアクティブストリーム、手動コントロール有効/無効切替メソッド追加
+- `.kiro/specs/playback-enhancements/tasks.md` — タスク3.4を完了にマーク
+
+コミット済み: `3.4 タイムコード受信モードUIを追加する`
+
+[STDERR]
+SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/hooks/cleanup-test-results.ps1"] failed: -File �p�����[�^�[�̈��� '.claude/hooks/cleanup-test-results.ps1' �͑��݂��܂���B������ '.ps1' �t�@�C���̃p�X�� -File �p�����[�^�[�̈����Ƃ��Ďw�肵�Ă��������B
+
+
+=== END 3.4 タイムコード受信モードUIを追加する (exit: 0, 2026-02-24 21:56:30) ===
+=== START 3.5 タイムコード同期再生ロジックをアプリケーション層に統合する (2026-02-24 21:56:30) ===
+タスク 3.5 の実装が完了しました。
+
+### 実装サマリ
+
+
+#### 作成・変更ファイル
+
+**タスク 3.5**: タイムコード同期再生ロジックをアプリケーション層に統合する — **完了**
+| ファイル | 内容 |
+| `Assets/Tests/EditMode/TimecodeSyncTests.cs` (新規) | 25テストケース: 純粋ロジックテスト + リフレクションによるフィールド・メソッド存在確認 |
+|---|---|
+| `Assets/Scripts/Core/Player/TimecodeSyncLogic.cs` (新規) | `CanEnableTimecodeMode`, `ShouldPauseOnTimeout`, `ShouldResumeFromTimeout`, `ClampTimecodeToPlaybackRange` |
+| `Assets/Scripts/Core/Application/ArtNetPlayerApplication.cs` (変更) | タイムコード同期再生ロジック統合 (`EnableTimecodeMode`, `DisableTimecodeMode`, `ProcessTimecodeFrame`, `Update`分岐) |
+
+| `.kiro/specs/playback-enhancements/tasks.md` (変更) | タスク3.5を完了に更新 |
+#### 主な実装内容
+- タイムコード受信モードの有効/無効フラグ管理（UIトグル連動）
+- 毎フレームのタイムコードキューからのデータ取得・シーク・DMX送信
+- モード有効時の手動再生コントロール無効化
+- モード無効時の手動操作復元・再生位置保持
+- タイムアウト検出時の一時停止処理
+- 録画データロード済み検証
+
+コミット `3.5 タイムコード同期再生ロジックをアプリケーション層に統合する` を作成済みです。
+
+[STDERR]
+SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/hooks/cleanup-test-results.ps1"] failed: -File �p�����[�^�[�̈��� '.claude/hooks/cleanup-test-results.ps1' �͑��݂��܂���B������ '.ps1' �t�@�C���̃p�X�� -File �p�����[�^�[�̈����Ƃ��Ďw�肵�Ă��������B
+
+
+=== END 3.5 タイムコード同期再生ロジックをアプリケーション層に統合する (exit: 0, 2026-02-24 22:00:52) ===
+=== START 4 ArtNet再送信先設定の永続化を実装する (2026-02-24 22:00:52) ===
