@@ -13,9 +13,15 @@ namespace ProjectBlue.ArtNetRecorder
     /// ArtNet Timecodeパケットをバックグラウンドスレッドで受信し、
     /// タイムコード値をメインスレッドに通知するコンポーネント。
     /// タスク 3.2: タイムコード受信コンポーネントを新規作成する
+    /// タスク 3.3: タイムコード受信タイムアウト検出を実装する
     ///
     /// 既存の ArtNetRecorder と同じバックグラウンドスレッド + ConcurrentQueue パターンを踏襲する。
     /// ポート6454で UDP パケットを受信し、OpTimeCode (0x9700) を検出してパースする。
+    ///
+    /// タイムアウト検出:
+    /// - 最終受信からの経過時間を監視し、閾値（デフォルト2秒）を超えた場合に IsTimedOut が true を返す
+    /// - タイムアウト閾値は Inspector から timeoutSeconds フィールドで調整可能
+    /// - 判定ロジックは TimecodeTimeoutLogic クラスに委譲し、EditMode テストで検証可能にする
     /// </summary>
     public class ArtNetTimecodeReceiver : MonoBehaviour
     {
@@ -25,14 +31,21 @@ namespace ProjectBlue.ArtNetRecorder
         /// <summary>メインスレッドが Update() で TryDequeue して取得するタイムコードキュー</summary>
         public ConcurrentQueue<TimecodeData> TimecodeQueue { get; } = new ConcurrentQueue<TimecodeData>();
 
-        /// <summary>タイムアウト状態かどうか。最終受信から timeoutSeconds を超えた場合に true。</summary>
+        /// <summary>
+        /// タイムアウト状態かどうか。最終受信から timeoutSeconds を超えた場合に true。
+        /// 判定ロジックは TimecodeTimeoutLogic に委譲し、テスト可能性を確保する。
+        /// </summary>
         public bool IsTimedOut
         {
             get
             {
-                if (!isReceiving) return false;
-                if (lastReceivedTime < 0) return true; // まだ一度も受信していない
-                return (Time.realtimeSinceStartup - lastReceivedTime) > timeoutSeconds;
+                return TimecodeTimeoutLogic.DetermineTimeoutState(
+                    isReceiving: isReceiving,
+                    hasReceivedAtLeastOnce: lastReceivedTime >= 0f,
+                    elapsedSinceLastReceive: lastReceivedTime >= 0f
+                        ? Time.realtimeSinceStartup - lastReceivedTime
+                        : 0f,
+                    timeoutThresholdSeconds: timeoutSeconds);
             }
         }
 
