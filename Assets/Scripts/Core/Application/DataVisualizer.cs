@@ -30,6 +30,9 @@ public class DataVisualizer : MonoBehaviour, IDisposable
     /// </summary>
     public void Initialize(int maxUniverseNum = 64)
     {
+        // 再初期化時に既存リソースを解放してからリークを防止する
+        Dispose();
+
         // ComputeShaderのスレッドグループサイズ(32)の倍数に切り上げ（安全策）
         this.maxUniverseNum = ((maxUniverseNum + 31) / 32) * 32;
 
@@ -72,5 +75,8 @@ public class DataVisualizer : MonoBehaviour, IDisposable
     public void Dispose()
     {
         dmxComputeBuffer?.Release();
+        dmxComputeBuffer = null;
+        dmxBuffer?.Release();
+        dmxBuffer = null;
     }
 }

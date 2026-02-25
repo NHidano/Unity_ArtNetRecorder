@@ -59,6 +59,12 @@ public class ArtNetPlayer : MonoBehaviour
         lastSearchIndex = -1;
     }
 
+    private void OnDestroy()
+    {
+        udpClient?.Dispose();
+        udpClient = null;
+    }
+
     public float[] ReadAndSend(double header)
     {
         var data = dmxRecordData.Data;

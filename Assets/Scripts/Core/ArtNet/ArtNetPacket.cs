@@ -9,8 +9,9 @@ public class ArtNetPacket
     
     public byte[] ToArray()
     {
-        var stream = new MemoryStream();
-        WriteData(new ArtNetBinaryWriter(stream));
+        using var stream = new MemoryStream();
+        using var writer = new ArtNetBinaryWriter(stream);
+        WriteData(writer);
         return stream.ToArray();
     }
 

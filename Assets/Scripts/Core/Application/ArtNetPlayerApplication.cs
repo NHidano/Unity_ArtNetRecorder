@@ -170,6 +170,8 @@ public class ArtNetPlayerApplication : ApplicationBase
 
         if (!initialized) return;
 
+        Application.targetFrameRate = 60;
+
         // ここでヘッダ読んでくる
 
         header = playerUI.GetSliderPosition() * endTime;
@@ -184,6 +186,8 @@ public class ArtNetPlayerApplication : ApplicationBase
 
     public void Pause()
     {
+        Application.targetFrameRate = 30;
+
         playerUI.SetAsPlayVisual();
         playState = PlayState.Pausing;
 

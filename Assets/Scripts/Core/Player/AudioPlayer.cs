@@ -48,5 +48,7 @@ public class AudioPlayer : MonoBehaviour
         if (r.result == UnityWebRequest.Result.Success){
             source.clip = DownloadHandlerAudioClip.GetContent(r);
         }
+
+        r.Dispose();
     }
 }
