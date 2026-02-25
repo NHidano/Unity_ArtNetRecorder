@@ -1,7 +1,9 @@
 {
     "name": "EditModeTests",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "ProjectBlue.ArtNetRecorder"
+    ],
     "includePlatforms": [
         "Editor"
     ],
@@ -9,8 +11,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll",
-        "Assembly-CSharp.dll"
+        "nunit.framework.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [
