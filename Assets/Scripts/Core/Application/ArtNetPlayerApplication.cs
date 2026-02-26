@@ -134,6 +134,10 @@ public class ArtNetPlayerApplication : ApplicationBase
 
         initialized = false;
 
+        // ファイルロード前にRawImageを即座に無効化し、
+        // 解放済みテクスチャの描画を防ぐ
+        visualizer.Close();
+
         // read file
         loadingUI.Display();
 
@@ -141,10 +145,17 @@ public class ArtNetPlayerApplication : ApplicationBase
 
         loadingUI.Hide();
 
-        endTime = data.Duration;
-
         if (data != null)
         {
+            endTime = data.Duration;
+
+            // 既存GPUリソースを解放
+            visualizer.Dispose();
+
+            // 1フレーム待機してGPUリソースのクリーンアップを確実にする
+            await UniTask.Yield();
+            await Resources.UnloadUnusedAssets();
+
             // 録画データから実際のユニバース数を取得し、ComputeShaderディスパッチ用に32の倍数に切り上げ
             var maxUniverseNum = ((data.MaxUniverseCount + 31) / 32) * 32;
 

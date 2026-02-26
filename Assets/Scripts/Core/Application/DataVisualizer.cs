@@ -33,8 +33,8 @@ public class DataVisualizer : MonoBehaviour, IDisposable
         // 再初期化時に既存リソースを解放してからリークを防止する
         Dispose();
 
-        // ComputeShaderのスレッドグループサイズ(32)の倍数に切り上げ（安全策）
-        this.maxUniverseNum = ((maxUniverseNum + 31) / 32) * 32;
+        // ComputeShaderのスレッドグループサイズ(32)の倍数に切り上げ、最小32を保証
+        this.maxUniverseNum = Mathf.Max(32, ((maxUniverseNum + 31) / 32) * 32);
 
         kernelIndex = dmxTextureBufferCompute.FindKernel("CSMain");
         dmxComputeBuffer = new ComputeBuffer(this.maxUniverseNum * 512, sizeof(float));
@@ -44,22 +44,22 @@ public class DataVisualizer : MonoBehaviour, IDisposable
         dmxTextureBufferCompute.SetTexture(kernelIndex, "_Result", dmxBuffer);
 
         rawImage.texture = dmxBuffer;
+        rawImage.enabled = true;
     }
 
-    // Update is called once per frame
     public void Exec(float[] dmxRaw)
     {
+        if (dmxComputeBuffer == null || dmxBuffer == null) return;
 
         dmxComputeBuffer.SetData(dmxRaw);
         dmxTextureBufferCompute.Dispatch(kernelIndex, 512 / 32, maxUniverseNum / 32, 1);
-
     }
     
     private RenderTexture CreateRenderTexture(int width, int height)
     {
-        var renderTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGBFloat);
-        renderTexture.graphicsFormat = GraphicsFormat.R16_SFloat;
-        renderTexture.enableRandomWrite = true;
+        var desc = new RenderTextureDescriptor(width, height, GraphicsFormat.R16_SFloat, 0);
+        desc.enableRandomWrite = true;
+        var renderTexture = new RenderTexture(desc);
         renderTexture.hideFlags = HideFlags.DontSave;
         renderTexture.filterMode = FilterMode.Point;
         renderTexture.wrapMode = TextureWrapMode.Repeat;
@@ -74,6 +74,17 @@ public class DataVisualizer : MonoBehaviour, IDisposable
 
     public void Dispose()
     {
+        // RawImageの参照をGPUリソース解放前にクリアし、
+        // Canvasが解放済みテクスチャを描画するのを防ぐ
+        if (rawImage != null)
+        {
+            rawImage.texture = null;
+            rawImage.enabled = false;
+        }
+
+        // GPUの未処理コマンドを送出してから解放する
+        GL.Flush();
+
         dmxComputeBuffer?.Release();
         dmxComputeBuffer = null;
         dmxBuffer?.Release();
