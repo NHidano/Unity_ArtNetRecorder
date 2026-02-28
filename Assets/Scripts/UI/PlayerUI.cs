@@ -22,6 +22,9 @@ public class PlayerUI : MonoBehaviour
 
     private double endTimeMillisec;
 
+    // "MM:SS;mmm" = 9文字固定
+    private readonly char[] headerCharBuffer = new char[9];
+
     public IObservable<Unit> OnPlayButtonPressedAsObservable => playButton.OnClickAsObservable;
 
     // ループトグル変更イベントをリアクティブストリームとして公開する
@@ -34,17 +37,36 @@ public class PlayerUI : MonoBehaviour
     {
         SetAsPlayVisual();
 
-        slider.OnValueChangedAsObservable().Subscribe(value =>
-        {
+        slider.OnValueChangedAsObservable()
+            .ThrottleFirst(TimeSpan.FromMilliseconds(100))
+            .Subscribe(value =>
+            {
+                var headerMillisec = value * endTimeMillisec;
 
-            var headerMillisec = value * endTimeMillisec;
-            
-            var sec = headerMillisec * 0.001d;
-            var min = (int) (sec / 60);
-            sec = sec - (min * 60);
+                var sec = headerMillisec * 0.001d;
+                var min = (int)(sec / 60);
+                sec = sec - (min * 60);
+                var msec = (int)headerMillisec % 1000;
 
-            headerText.text = $"{min:D2}:{(int)sec:D2};{(int)headerMillisec % 1000:D3}";
-        }).AddTo(this);
+                FormatTimeToBuffer(min, (int)sec, msec);
+                headerText.text = new string(headerCharBuffer, 0, 9);
+            }).AddTo(this);
+    }
+
+    /// <summary>
+    /// "MM:SS;mmm" 形式で headerCharBuffer に書き込む。GCアロケーションなし。
+    /// </summary>
+    private void FormatTimeToBuffer(int min, int sec, int msec)
+    {
+        headerCharBuffer[0] = (char)('0' + min / 10);
+        headerCharBuffer[1] = (char)('0' + min % 10);
+        headerCharBuffer[2] = ':';
+        headerCharBuffer[3] = (char)('0' + sec / 10);
+        headerCharBuffer[4] = (char)('0' + sec % 10);
+        headerCharBuffer[5] = ';';
+        headerCharBuffer[6] = (char)('0' + msec / 100);
+        headerCharBuffer[7] = (char)('0' + msec % 100 / 10);
+        headerCharBuffer[8] = (char)('0' + msec % 10);
     }
     
     public void SetAsPauseVisual()

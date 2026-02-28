@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using Cysharp.Threading.Tasks;
 using ProjectBlue;
@@ -23,6 +24,11 @@ public class ArtNetPlayer : MonoBehaviour
     private int lastSearchIndex = -1;
 
     UdpClient udpClient = new UdpClient();
+
+    private byte[] sendBuffer;
+    private IPEndPoint cachedEndPoint;
+    private IPAddress cachedIPAddress;
+    private int cachedPort;
 
     public async UniTask<DmxRecordData> Load(string path)
     {
@@ -56,6 +62,8 @@ public class ArtNetPlayer : MonoBehaviour
 
         dmxRaw = new float[maxUniverseNum * 512];
 
+        sendBuffer = new byte[ArtNetDmxPacket.PacketSize];
+
         lastSearchIndex = -1;
     }
 
@@ -76,6 +84,20 @@ public class ArtNetPlayer : MonoBehaviour
 
         var packet = data[index];
 
+        // Resend有効時、IP/Port変更があればIPEndPointを再生成
+        var resendEnabled = artNetResendUI.IsEnabled;
+        if (resendEnabled)
+        {
+            var currentIP = artNetResendUI.IPAddress;
+            var currentPort = artNetResendUI.Port;
+            if (cachedEndPoint == null || !Equals(cachedIPAddress, currentIP) || cachedPort != currentPort)
+            {
+                cachedIPAddress = currentIP;
+                cachedPort = currentPort;
+                cachedEndPoint = new IPEndPoint(cachedIPAddress, cachedPort);
+            }
+        }
+
         // ユニバースデータをバッファにコピー（境界チェック付き）
         foreach (var universeData in packet.data)
         {
@@ -87,25 +109,23 @@ public class ArtNetPlayer : MonoBehaviour
 
             Buffer.BlockCopy(universeData.data, 0, dmx[universeData.universe], 0, universeData.data.Length);
 
-            if (artNetResendUI.IsEnabled)
+            if (resendEnabled)
             {
-                var artNetPacket = new ArtNetDmxPacket
-                {
-                    Universe = (short) universeData.universe, DmxData = dmx[universeData.universe]
-                };
-
-                var artNetPacketBytes = artNetPacket.ToArray();
-
-                udpClient.Send(artNetPacketBytes, artNetPacketBytes.Length, artNetResendUI.IPAddress.ToString(), artNetResendUI.Port);
+                var len = ArtNetDmxPacket.WriteToBuffer(sendBuffer, (short)universeData.universe, dmx[universeData.universe]);
+                udpClient.Send(sendBuffer, len, cachedEndPoint);
             }
         }
 
         // 全ユニバースのチャンネルデータをフラットなfloat配列にコピー
-        for (var universe = 0; universe < dmx.Length; universe++)
+        var universeCount = dmx.Length;
+        for (var universe = 0; universe < universeCount; universe++)
         {
-            for (var channel = 0; channel < dmx[universe].Length; channel++)
+            var universeBytes = dmx[universe];
+            var channelCount = universeBytes.Length;
+            var baseOffset = universe * channelCount;
+            for (var channel = 0; channel < channelCount; channel++)
             {
-                dmxRaw[universe * dmx[universe].Length + channel] = dmx[universe][channel];
+                dmxRaw[baseOffset + channel] = universeBytes[channel];
             }
         }
 
