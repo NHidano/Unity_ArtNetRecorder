@@ -111,8 +111,12 @@ public class ArtNetPlayer : MonoBehaviour
 
             if (resendEnabled)
             {
-                var len = ArtNetDmxPacket.WriteToBuffer(sendBuffer, (short)universeData.universe, dmx[universeData.universe]);
-                udpClient.Send(sendBuffer, len, cachedEndPoint);
+                var offsetUniverse = universeData.universe + artNetResendUI.UniverseOffset;
+                if (offsetUniverse >= 0 && offsetUniverse <= 32767)
+                {
+                    var len = ArtNetDmxPacket.WriteToBuffer(sendBuffer, (short)offsetUniverse, dmx[universeData.universe]);
+                    udpClient.Send(sendBuffer, len, cachedEndPoint);
+                }
             }
         }
 

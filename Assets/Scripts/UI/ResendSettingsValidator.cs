@@ -14,6 +14,9 @@ public static class ResendSettingsKeys
 
     /// <summary>再送信トグル状態のキー (0=OFF, 1=ON)</summary>
     public const string Enabled = "ArtNetResend_Enabled";
+
+    /// <summary>ユニバースオフセットのキー</summary>
+    public const string UniverseOffset = "ArtNetResend_UniverseOffset";
 }
 
 /// <summary>
@@ -30,6 +33,9 @@ public static class ResendSettingsDefaults
 
     /// <summary>デフォルトのトグル状態 (0=OFF)</summary>
     public const int Enabled = 0;
+
+    /// <summary>デフォルトのユニバースオフセット</summary>
+    public const int UniverseOffset = 0;
 }
 
 /// <summary>
@@ -93,6 +99,26 @@ public static class ResendSettingsValidator
     public static int GetValidatedPort(int port)
     {
         return IsValidPort(port) ? port : ResendSettingsDefaults.DstPort;
+    }
+
+    /// <summary>
+    /// ユニバースオフセットが有効な範囲 (-512〜512) 内かどうかを検証する。
+    /// </summary>
+    /// <param name="offset">検証するオフセット値</param>
+    /// <returns>有効な場合は true</returns>
+    public static bool IsValidUniverseOffset(int offset)
+    {
+        return offset >= -512 && offset <= 512;
+    }
+
+    /// <summary>
+    /// ユニバースオフセットを検証し、不正な場合はデフォルト値を返す。
+    /// </summary>
+    /// <param name="offset">検証するオフセット値</param>
+    /// <returns>有効な場合はそのまま返す。不正な場合はデフォルト値</returns>
+    public static int GetValidatedUniverseOffset(int offset)
+    {
+        return IsValidUniverseOffset(offset) ? offset : ResendSettingsDefaults.UniverseOffset;
     }
 
     /// <summary>

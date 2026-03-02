@@ -11,15 +11,18 @@ public class ArtNetResendUI : MonoBehaviour
     [SerializeField] private Toggle enableToggle;
     [SerializeField] private InputField ipInputField;
     [SerializeField] private InputField portInputField;
+    [SerializeField] private InputField universeOffsetInputField;
 
     public bool IsEnabled => isValidated && enableToggle.isOn;
     public int Port => port;
     public IPAddress IPAddress => ipAddress;
+    public int UniverseOffset => universeOffset;
 
     private bool isValidated;
 
     private int port;
     private IPAddress ipAddress;
+    private int universeOffset;
 
     private void Start()
     {
@@ -62,6 +65,23 @@ public class ArtNetResendUI : MonoBehaviour
             }
         }).AddTo(this);
 
+        if (universeOffsetInputField != null)
+        {
+            universeOffsetInputField.OnValueChangedAsObservable().Subscribe(t =>
+            {
+                if (int.TryParse(t, out var value) && ResendSettingsValidator.IsValidUniverseOffset(value))
+                {
+                    universeOffset = value;
+                    universeOffsetInputField.image.color = Color.cyan;
+                    SaveUniverseOffset(value);
+                }
+                else
+                {
+                    universeOffsetInputField.image.color = Color.red;
+                }
+            }).AddTo(this);
+        }
+
         // トグル状態の変更を購読し、即時保存する
         enableToggle.OnValueChangedAsObservable().Subscribe(isOn =>
         {
@@ -88,6 +108,14 @@ public class ArtNetResendUI : MonoBehaviour
         // トグル状態の読み込み
         var savedEnabled = PlayerPrefs.GetInt(ResendSettingsKeys.Enabled, ResendSettingsDefaults.Enabled);
         enableToggle.isOn = ResendSettingsValidator.IntToToggleState(savedEnabled);
+
+        // ユニバースオフセットの読み込みと検証
+        if (universeOffsetInputField != null)
+        {
+            var savedOffset = PlayerPrefs.GetInt(ResendSettingsKeys.UniverseOffset, ResendSettingsDefaults.UniverseOffset);
+            var validatedOffset = ResendSettingsValidator.GetValidatedUniverseOffset(savedOffset);
+            universeOffsetInputField.text = validatedOffset.ToString();
+        }
     }
 
     /// <summary>
@@ -113,10 +141,16 @@ public class ArtNetResendUI : MonoBehaviour
     }
 
     /// <summary>
-    /// トグル状態をPlayerPrefsに保存する。
-    /// 値の変更時に即時保存される。
+    /// ユニバースオフセットをPlayerPrefsに保存する。
+    /// 検証成功時のみ呼び出される。
     /// </summary>
-    /// <param name="isOn">トグルのON/OFF状態</param>
+    /// <param name="offset">保存するオフセット値</param>
+    private void SaveUniverseOffset(int offset)
+    {
+        PlayerPrefs.SetInt(ResendSettingsKeys.UniverseOffset, offset);
+        PlayerPrefs.Save();
+    }
+
     private void SaveToggleState(bool isOn)
     {
         PlayerPrefs.SetInt(ResendSettingsKeys.Enabled, ResendSettingsValidator.ToggleStateToInt(isOn));
