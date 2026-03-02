@@ -82,7 +82,10 @@ public class DataVisualizer : MonoBehaviour, IDisposable
             rawImage.enabled = false;
         }
 
-        // GPUの未処理コマンドを送出してから解放する
+        // GPUの未処理コマンドを送出する。
+        // 注意: GL.Flush()はコマンド送出のみでGPU完了を待たない。
+        // 呼び出し元がDispose()前にGPUパイプラインのドレイン（数フレーム待機）を
+        // 行うことで、インフライトのDispatchが完了していることを保証する必要がある。
         GL.Flush();
 
         dmxComputeBuffer?.Release();

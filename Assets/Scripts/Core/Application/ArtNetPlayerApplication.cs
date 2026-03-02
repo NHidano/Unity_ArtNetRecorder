@@ -31,6 +31,10 @@ public class ArtNetPlayerApplication : ApplicationBase
 
     private bool initialized = false;
 
+    // 初期化の再入制御用バージョンカウンター。
+    // 複数のInitialize()呼び出しが重複した場合、古い初期化を安全に中断する。
+    private int initVersion;
+
     private double header = 0;
     private double endTime;
 
@@ -125,6 +129,8 @@ public class ArtNetPlayerApplication : ApplicationBase
 
     private async void Initialize(string path)
     {
+        // 再入制御: 前回の初期化が進行中の場合、バージョン不一致で安全に中断される
+        var myVersion = ++initVersion;
 
         // タイムコードモード中に新しいデータをロードする場合はモードを無効化する
         if (isTimecodeMode)
@@ -145,16 +151,26 @@ public class ArtNetPlayerApplication : ApplicationBase
 
         loadingUI.Hide();
 
+        // 再入チェック: ファイルロード中に別のInitialize()が呼ばれた場合は中断
+        if (initVersion != myVersion) return;
+
         if (data != null)
         {
             endTime = data.Duration;
 
-            // 既存GPUリソースを解放
-            visualizer.Dispose();
+            // GPU パイプラインドレイン:
+            // initialized=false により Update() からの新規 Dispatch() は停止済み。
+            // D3D11 の描画パイプラインは通常1-2フレーム深いため、
+            // 3フレーム待機して全てのインフライトコンピュートDispatchが
+            // GPU上で完了したことを保証してからリソースを解放する。
+            // GL.Flush() だけではコマンド送出のみで完了を待たないため不十分。
+            await UniTask.DelayFrame(3);
 
-            // 1フレーム待機してGPUリソースのクリーンアップを確実にする
-            await UniTask.Yield();
-            await Resources.UnloadUnusedAssets();
+            // 再入チェック: GPU待機中に別のInitialize()が呼ばれた場合は中断
+            if (initVersion != myVersion) return;
+
+            // GPU処理完了後、安全にリソースを解放
+            visualizer.Dispose();
 
             // 録画データから実際のユニバース数を取得し、ComputeShaderディスパッチ用に32の倍数に切り上げ
             var maxUniverseNum = ((data.MaxUniverseCount + 31) / 32) * 32;
@@ -172,8 +188,6 @@ public class ArtNetPlayerApplication : ApplicationBase
 
             initialized = true;
         }
-
-        // ローディング画面から開ける
     }
 
     public void Resume()
