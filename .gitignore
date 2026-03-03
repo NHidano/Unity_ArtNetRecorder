@@ -62,3 +62,4 @@ Assets/StreamingAssets/
 .idea/
 
 UserSettings/
+.claude/settings.local.json

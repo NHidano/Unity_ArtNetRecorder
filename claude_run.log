@@ -328,3 +328,24 @@ SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/ho
 
 === END 5.2 ループ再生とタイムコード同期再生の統合確認 (exit: 0, 2026-02-24 22:14:40) ===
 === START 5.3 永続化設定の統合確認 (2026-02-24 22:14:40) ===
+コミットが完了しました。
+
+### タスク 5.3 完了サマリー
+
+- **新規テストファイル**: `Assets/Tests/EditMode/ResendPersistenceIntegrationTests.cs` (33テスト)
+**実施内容**: 永続化設定の統合確認
+  - 保存・復元の完全フロー検証 (7テスト)
+  - 不正データフォールバック動作の検証 (6テスト)
+  - デフォルト値表示の検証 (5テスト)
+  - 構造的統合検証 (4テスト)
+  - エンドツーエンドシナリオ (5テスト)
+- **tasks.md更新**: タスク 2, 3, 5 の親タスクおよび 5.3 を完了マーク
+
+**全タスク完了**: `playback-enhancements` 仕様のすべてのタスクが完了しました。
+  - 検証ロジック整合性 (3テスト)
+
+[STDERR]
+SessionEnd hook [powershell -NoProfile -ExecutionPolicy Bypass -File ".claude/hooks/cleanup-test-results.ps1"] failed: -File �p�����[�^�[�̈��� '.claude/hooks/cleanup-test-results.ps1' �͑��݂��܂���B������ '.ps1' �t�@�C���̃p�X�� -File �p�����[�^�[�̈����Ƃ��Ďw�肵�Ă��������B
+
+
+=== END 5.3 永続化設定の統合確認 (exit: 0, 2026-02-24 22:19:54) ===
